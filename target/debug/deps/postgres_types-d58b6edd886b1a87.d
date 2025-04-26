@@ -1,0 +1,10 @@
+/home/ljtwp/Desktop/odhack/InheritX-Backend/target/debug/deps/libpostgres_types-d58b6edd886b1a87.rmeta: /home/ljtwp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/postgres-types-0.2.9/src/lib.rs /home/ljtwp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/postgres-types-0.2.9/src/uuid_1.rs /home/ljtwp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/postgres-types-0.2.9/src/pg_lsn.rs /home/ljtwp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/postgres-types-0.2.9/src/private.rs /home/ljtwp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/postgres-types-0.2.9/src/special.rs /home/ljtwp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/postgres-types-0.2.9/src/type_gen.rs
+
+/home/ljtwp/Desktop/odhack/InheritX-Backend/target/debug/deps/postgres_types-d58b6edd886b1a87.d: /home/ljtwp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/postgres-types-0.2.9/src/lib.rs /home/ljtwp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/postgres-types-0.2.9/src/uuid_1.rs /home/ljtwp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/postgres-types-0.2.9/src/pg_lsn.rs /home/ljtwp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/postgres-types-0.2.9/src/private.rs /home/ljtwp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/postgres-types-0.2.9/src/special.rs /home/ljtwp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/postgres-types-0.2.9/src/type_gen.rs
+
+/home/ljtwp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/postgres-types-0.2.9/src/lib.rs:
+/home/ljtwp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/postgres-types-0.2.9/src/uuid_1.rs:
+/home/ljtwp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/postgres-types-0.2.9/src/pg_lsn.rs:
+/home/ljtwp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/postgres-types-0.2.9/src/private.rs:
+/home/ljtwp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/postgres-types-0.2.9/src/special.rs:
+/home/ljtwp/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/postgres-types-0.2.9/src/type_gen.rs:
