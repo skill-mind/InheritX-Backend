@@ -5,6 +5,7 @@ mod repositories;
 mod routes;
 
 use actix_web::{App, HttpServer, web};
+use controller::{claim_controller, notification_controller};
 use db::create_pool;
 
 #[actix_web::main]
@@ -22,6 +23,8 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(pool.clone()))
             // Use the routes module to configure all application routes
             .configure(routes::configure)
+            .configure(notification_controller::config)
+            .configure(claim_controller::config)
     })
     .bind("127.0.0.1:8080")?
     .run()
