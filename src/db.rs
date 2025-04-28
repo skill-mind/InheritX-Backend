@@ -29,6 +29,17 @@ pub async fn run_migrations(pool: &deadpool_postgres::Pool) {
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
+
+        CREATE TABLE IF NOT EXISTS user_activities (
+            id SERIAL PRIMARY KEY,
+            user_id VARCHAR(255) NOT NULL,
+            date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            activity_type VARCHAR(50) NOT NULL,
+            details TEXT NOT NULL,
+            action_type VARCHAR(50) NOT NULL,
+            action_link TEXT,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
     ",
         )
         .await
