@@ -33,7 +33,17 @@ pub async fn run_migrations(pool: &deadpool_postgres::Pool) {
         CREATE TABLE IF NOT EXISTS faqs (
             id SERIAL PRIMARY KEY,
             question TEXT NOT NULL,
-            answer TEXT NOT NULL,
+            answer TEXT NOT NULL
+        );
+
+        CREATE TYPE IF NOT EXISTS claim_status AS ENUM ('pending', 'approved', 'rejected');
+
+        CREATE TABLE IF NOT EXISTS claims (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL,
+            amount DECIMAL(10,2) NOT NULL,
+            status claim_status NOT NULL DEFAULT 'pending',
+            description TEXT NOT NULL,
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
