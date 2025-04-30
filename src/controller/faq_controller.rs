@@ -1,5 +1,9 @@
+use crate::models::faq::FAQ;
 use actix_web::{HttpResponse, Responder, web};
+use chrono::Utc;
+use deadpool_postgres::Pool;
 use serde_json::json;
+use tokio_postgres::Row;
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(
@@ -11,23 +15,77 @@ pub fn config(cfg: &mut web::ServiceConfig) {
     );
 }
 
-pub async fn get_faqs() -> impl Responder {
-    // Placeholder logic for fetching FAQs
-    HttpResponse::Ok().json(json!({"message": "List of FAQs"}))
+pub async fn get_faqs(pool: web::Data<Pool>) -> impl Responder {
+    let client = pool.get().await.unwrap();
+
+    let rows = client
+        .query(
+            "SELECT id, question, answer, created_at, updated_at FROM faqs",
+            &[],
+        )
+        .await
+        .unwrap();
+
+    let faqs: Vec<FAQ> = rows.iter().map(|row| row_to_faq(row)).collect();
+
+    HttpResponse::Ok().json(faqs)
 }
 
-pub async fn create_faq(faq: web::Json<serde_json::Value>) -> impl Responder {
-    // Placeholder logic for creating an FAQ
-    HttpResponse::Created().json(json!({"message": "FAQ created", "data": faq.into_inner()}))
+pub async fn create_faq(pool: web::Data<Pool>, faq: web::Json<FAQ>) -> impl Responder {
+    let client = pool.get().await.unwrap();
+
+    let row = client
+        .query_one(
+            "INSERT INTO faqs (question, answer, created_at, updated_at) VALUES ($1, $2, $3, $4) RETURNING id, question, answer, created_at, updated_at",
+            &[&faq.question, &faq.answer, &Utc::now(), &Utc::now()],
+        )
+        .await
+        .unwrap();
+
+    let new_faq = row_to_faq(&row);
+
+    HttpResponse::Created().json(json!({"message": "FAQ created", "data": new_faq}))
 }
 
-pub async fn update_faq(path: web::Path<i32>, faq: web::Json<serde_json::Value>) -> impl Responder {
-    // Placeholder logic for updating an FAQ
-    HttpResponse::Ok()
-        .json(json!({"message": "FAQ updated", "id": path.into_inner(), "data": faq.into_inner()}))
+pub async fn update_faq(
+    pool: web::Data<Pool>,
+    path: web::Path<i32>,
+    faq: web::Json<FAQ>,
+) -> impl Responder {
+    let id = path.into_inner();
+    let client = pool.get().await.unwrap();
+
+    let row = client
+        .query_one(
+            "UPDATE faqs SET question = $1, answer = $2, updated_at = $3 WHERE id = $4 RETURNING id, question, answer, created_at, updated_at",
+            &[&faq.question, &faq.answer, &Utc::now(), &id],
+        )
+        .await
+        .unwrap();
+
+    let updated_faq = row_to_faq(&row);
+
+    HttpResponse::Ok().json(json!({"message": "FAQ updated", "data": updated_faq}))
 }
 
-pub async fn delete_faq(path: web::Path<i32>) -> impl Responder {
-    // Placeholder logic for deleting an FAQ
-    HttpResponse::NoContent().finish()
+pub async fn delete_faq(pool: web::Data<Pool>, path: web::Path<i32>) -> impl Responder {
+    let id = path.into_inner();
+    let client = pool.get().await.unwrap();
+
+    client
+        .execute("DELETE FROM faqs WHERE id = $1", &[&id])
+        .await
+        .unwrap();
+
+    HttpResponse::Ok().json(json!({"message": format!("FAQ with id {} deleted", id)}))
+}
+
+fn row_to_faq(row: &Row) -> FAQ {
+    FAQ {
+        id: row.get("id"),
+        question: row.get("question"),
+        answer: row.get("answer"),
+        created_at: row.get("created_at"),
+        updated_at: row.get("updated_at"),
+    }
 }
