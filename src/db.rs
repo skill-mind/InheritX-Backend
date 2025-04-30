@@ -30,6 +30,15 @@ pub async fn run_migrations(pool: &deadpool_postgres::Pool) {
             updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
 
+        CREATE TABLE IF NOT EXISTS user_activities (
+            id SERIAL PRIMARY KEY,
+            user_id VARCHAR(255) NOT NULL,
+            date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            activity_type VARCHAR(50) NOT NULL,
+            details TEXT NOT NULL,
+            action_type VARCHAR(50) NOT NULL,
+            action_link TEXT,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         CREATE TYPE claim_status AS ENUM ('pending', 'approved', 'rejected');
 
         CREATE TABLE IF NOT EXISTS claims (
