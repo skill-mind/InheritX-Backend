@@ -1,9 +1,9 @@
-use serde::{Serialize, Deserialize};
-use chrono::{DateTime, Utc};
-use tokio_postgres::types::{FromSql, ToSql, Type, IsNull};
 use bytes::BytesMut;
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::fmt::{self, Display, Formatter};
+use tokio_postgres::types::{FromSql, IsNull, ToSql, Type};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Claim {
@@ -48,7 +48,11 @@ impl Display for ClaimStatus {
 }
 
 impl ToSql for ClaimStatus {
-    fn to_sql(&self, ty: &Type, out: &mut BytesMut) -> Result<IsNull, Box<dyn Error + Sync + Send>> {
+    fn to_sql(
+        &self,
+        ty: &Type,
+        out: &mut BytesMut,
+    ) -> Result<IsNull, Box<dyn Error + Sync + Send>> {
         let s = match self {
             ClaimStatus::Pending => "pending",
             ClaimStatus::Approved => "approved",
@@ -61,7 +65,11 @@ impl ToSql for ClaimStatus {
         ty.name() == "claim_status"
     }
 
-    fn to_sql_checked(&self, ty: &Type, out: &mut BytesMut) -> Result<IsNull, Box<dyn Error + Sync + Send>> {
+    fn to_sql_checked(
+        &self,
+        ty: &Type,
+        out: &mut BytesMut,
+    ) -> Result<IsNull, Box<dyn Error + Sync + Send>> {
         self.to_sql(ty, out)
     }
 }
@@ -80,4 +88,4 @@ impl<'a> FromSql<'a> for ClaimStatus {
     fn accepts(ty: &Type) -> bool {
         ty.name() == "claim_status"
     }
-} 
+}
