@@ -4,7 +4,7 @@ mod models;
 mod repositories;
 
 use actix_web::{App, HttpServer, web};
-use controller::notification_controller;
+use controller::{faq_controller, notification_controller, user_support_controller};
 use db::create_pool;
 
 #[actix_web::main]
@@ -21,6 +21,8 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(web::Data::new(pool.clone()))
             .configure(notification_controller::config)
+            .configure(faq_controller::config)
+            .configure(user_support_controller::config)
     })
     .bind("127.0.0.1:8080")?
     .run()
