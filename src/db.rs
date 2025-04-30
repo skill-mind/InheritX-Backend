@@ -29,6 +29,18 @@ pub async fn run_migrations(pool: &deadpool_postgres::Pool) {
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
+
+        CREATE TYPE claim_status AS ENUM ('pending', 'approved', 'rejected');
+
+        CREATE TABLE IF NOT EXISTS claims (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL,
+            amount DECIMAL(10,2) NOT NULL,
+            status claim_status NOT NULL DEFAULT 'pending',
+            description TEXT NOT NULL,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
     ",
         )
         .await
