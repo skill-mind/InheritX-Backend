@@ -1,0 +1,1 @@
+// Using the figma file, create a route for faq and user support

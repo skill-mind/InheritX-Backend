@@ -1,4 +1,4 @@
-use crate::models::claim::{CreateClaim, UpdateClaim, ClaimStatus};
+use crate::models::claim::{ClaimStatus, CreateClaim, UpdateClaim};
 use crate::repositories::claim_repository;
 use actix_web::{HttpResponse, Responder, web};
 use deadpool_postgres::Pool;
@@ -15,15 +15,13 @@ pub async fn get_claims(db_pool: web::Data<Pool>) -> impl Responder {
 
     match claim_repository::get_all(&client).await {
         Ok(claims) => HttpResponse::Ok().json(claims),
-        Err(_) => HttpResponse::InternalServerError()
-            .json(json!({"error": "Failed to fetch claims"})),
+        Err(_) => {
+            HttpResponse::InternalServerError().json(json!({"error": "Failed to fetch claims"}))
+        }
     }
 }
 
-pub async fn get_user_claims(
-    db_pool: web::Data<Pool>,
-    path: web::Path<i32>,
-) -> impl Responder {
+pub async fn get_user_claims(db_pool: web::Data<Pool>, path: web::Path<i32>) -> impl Responder {
     let client = match db_pool.get().await {
         Ok(client) => client,
         Err(err) => {
@@ -106,8 +104,9 @@ pub async fn create_claim(
 
     match claim_repository::create(&client, &claim.into_inner()).await {
         Ok(created) => HttpResponse::Created().json(created),
-        Err(_) => HttpResponse::InternalServerError()
-            .json(json!({"error": "Failed to create claim"})),
+        Err(_) => {
+            HttpResponse::InternalServerError().json(json!({"error": "Failed to create claim"}))
+        }
     }
 }
 
@@ -126,8 +125,9 @@ pub async fn update_claim(
 
     match claim_repository::update(&client, path.into_inner(), &claim.into_inner()).await {
         Ok(updated) => HttpResponse::Ok().json(updated),
-        Err(_) => HttpResponse::InternalServerError()
-            .json(json!({"error": "Failed to update claim"})),
+        Err(_) => {
+            HttpResponse::InternalServerError().json(json!({"error": "Failed to update claim"}))
+        }
     }
 }
 
@@ -138,7 +138,10 @@ pub fn config(cfg: &mut web::ServiceConfig) {
             .route("", web::post().to(create_claim))
             .route("/user/{user_id}", web::get().to(get_user_claims))
             .route("/status/{status}", web::get().to(get_claims_by_status))
-            .route("/user/{user_id}/status/{status}", web::get().to(get_user_claims_by_status))
+            .route(
+                "/user/{user_id}/status/{status}",
+                web::get().to(get_user_claims_by_status),
+            )
             .route("/{id}", web::put().to(update_claim)),
     );
-} 
+}
