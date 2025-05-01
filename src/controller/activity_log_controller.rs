@@ -1,30 +1,37 @@
-use serde::{Deserialize, Serialize};
+use actix_web::{web, HttpResponse, Responder};
+use crate::model::ActivityLog;
+use std::sync::Mutex;
 
-#[derive(Debug, Serialize, Deserialize)] // Add Debug, Serialize, and Deserialize
-pub struct ActivityLog {
-    pub id: u32,
-    pub token_from: String,
-    pub token_to: String,
-    pub amount: f64,
-    pub timestamp: String,
+pub async fn create(log: web::Json<ActivityLog>, data: web::Data<Mutex<Vec<ActivityLog>>>) -> impl Responder {
+    let mut logs = data.lock().unwrap();
+    logs.push(log.into_inner());
+    HttpResponse::Created().json("Activity log created")
 }
 
-pub fn create_activity_log(log: ActivityLog) -> String {
-    // Logic to create a new activity log entry
-    format!("Activity log created: {:?}", log)
+pub async fn get_all(data: web::Data<Mutex<Vec<ActivityLog>>>) -> impl Responder {
+    let logs = data.lock().unwrap();
+    HttpResponse::Ok().json(&*logs)
 }
 
-pub fn get_activity_logs() -> Vec<ActivityLog> {
-    // Logic to fetch all activity logs
-    vec![]
+pub async fn update(path: web::Path<u32>, log: web::Json<ActivityLog>, data: web::Data<Mutex<Vec<ActivityLog>>>) -> impl Responder {
+    let id = path.into_inner();
+    let mut logs = data.lock().unwrap();
+    if let Some(existing) = logs.iter_mut().find(|x| x.id == id) {
+        *existing = log.into_inner();
+        HttpResponse::Ok().json("Updated")
+    } else {
+        HttpResponse::NotFound().json("Not found")
+    }
 }
 
-pub fn update_activity_log(id: u32, log: ActivityLog) -> String {
-    // Logic to update an activity log entry
-    format!("Activity log with ID {} updated: {:?}", id, log)
-}
-
-pub fn delete_activity_log(id: u32) -> String {
-    // Logic to delete an activity log entry
-    format!("Activity log with ID {} deleted", id)
+pub async fn delete(path: web::Path<u32>, data: web::Data<Mutex<Vec<ActivityLog>>>) -> impl Responder {
+    let id = path.into_inner();
+    let mut logs = data.lock().unwrap();
+    let len_before = logs.len();
+    logs.retain(|x| x.id != id);
+    if logs.len() < len_before {
+        HttpResponse::Ok().json("Deleted")
+    } else {
+        HttpResponse::NotFound().json("Not found")
+    }
 }
