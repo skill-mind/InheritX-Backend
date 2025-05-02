@@ -3,7 +3,8 @@ use deadpool_postgres::Pool;
 use serde_json::json;
 
 use crate::models::withdrawal_history_models::{
-    CreateWithdrawalRecordRequest, WithdrawalRecordResponse, WithdrawalRecordsResponse,
+    CreateWithdrawalRecordRequest, SingleWithdrawalRecordRequest, WithdrawalRecord,
+    WithdrawalRecordResponse, WithdrawalRecordsResponse,
 };
 use crate::repositories::withdrawal_history_repository;
 
@@ -39,9 +40,13 @@ pub struct PaginationParams {
     pub page_size: Option<i64>,
 }
 
+#[derive(serde::Deserialize)]
+pub struct GetSingleParams {
+    pub id: Option<i64>,
+}
+
 pub async fn get_withdrawal_history(
     db_pool: web::Data<Pool>,
-    path: web::Path<String>,
     query: web::Query<PaginationParams>,
 ) -> impl Responder {
     let page = query.page.unwrap_or(1);
@@ -87,6 +92,108 @@ pub async fn get_withdrawal_history(
             eprintln!("Failed to get user activities: {:?}", e);
             HttpResponse::InternalServerError()
                 .json(json!({"error": "Failed to get user activities"}))
+        }
+    }
+}
+
+pub async fn delete_withdrawal(
+    db_pool: web::Data<Pool>,
+    withdrawal_history_request: web::Json<SingleWithdrawalRecordRequest>,
+) -> impl Responder {
+    let client = match db_pool.get().await {
+        Ok(client) => client,
+        Err(err) => {
+            eprintln!("Failed to get DB client: {}", err);
+            return HttpResponse::InternalServerError().json(json!({"error": "Database error"}));
+        }
+    };
+
+    match withdrawal_history_repository::delete_withdrawal(&client, withdrawal_history_request.id)
+        .await
+    {
+        Ok(activity) => HttpResponse::Ok().json(activity),
+        Err(e) => {
+            eprintln!("Failed to create activity: {:?}", e);
+            HttpResponse::InternalServerError().json(json!({"error": "Failed to create activity"}))
+        }
+    }
+}
+
+pub async fn get_single_withdrawal(
+    db_pool: web::Data<Pool>,
+    query: web::Query<GetSingleParams>,
+) -> impl Responder {
+    let id = query.id.unwrap_or(0);
+    if id < 1 {
+        return HttpResponse::BadRequest().json(json!({"error": "ID must be a positive integer"}));
+    }
+    let client = match db_pool.get().await {
+        Ok(client) => client,
+        Err(err) => {
+            eprintln!("Failed to get DB client: {}", err);
+            return HttpResponse::InternalServerError().json(json!({"error": "Database error"}));
+        }
+    };
+
+    match withdrawal_history_repository::get_withdrawal_by_id(&client, id).await {
+        Ok(res) => HttpResponse::Ok().json(res),
+        Err(e) => {
+            eprintln!("Failed to create activity: {:?}", e);
+            HttpResponse::InternalServerError().json(json!({"error": "Failed to create activity"}))
+        }
+    }
+}
+
+pub async fn update_withdrawal(
+    db_pool: web::Data<Pool>,
+    withdrawal_history_request: web::Json<WithdrawalRecord>,
+) -> impl Responder {
+    // let record: WithdrawalRecord = withdrawal_history_request.into_inner();
+
+    let client = match db_pool.get().await {
+        Ok(client) => client,
+        Err(err) => {
+            eprintln!("Failed to get DB client: {}", err);
+            return HttpResponse::InternalServerError().json(json!({"error": "Database error"}));
+        }
+    };
+
+    match withdrawal_history_repository::update_withdrawal(
+        &client,
+        &withdrawal_history_request,
+        // &record,
+    )
+    .await
+    {
+        Ok(activity) => HttpResponse::Ok().json(activity),
+        Err(e) => {
+            eprintln!("Failed to create activity: {:?}", e);
+            HttpResponse::InternalServerError().json(json!({"error": "Failed to create activity"}))
+        }
+    }
+}
+
+pub async fn get_withdrawal_history_by_user(
+    db_pool: web::Data<Pool>,
+    query: web::Query<GetSingleParams>,
+) -> impl Responder {
+    let uid = query.id.unwrap_or(0);
+    if uid < 1 {
+        return HttpResponse::BadRequest().json(json!({"error": "ID must be a positive integer"}));
+    }
+
+    let client = match db_pool.get().await {
+        Ok(client) => client,
+        Err(err) => {
+            eprintln!("Failed to get DB client: {}", err);
+            return HttpResponse::InternalServerError().json(json!({"error": "Database error"}));
+        }
+    };
+    match withdrawal_history_repository::get_withdrawal_history_by_user_id(&client, &uid).await {
+        Ok(res) => HttpResponse::Ok().json(res),
+        Err(e) => {
+            eprintln!("Failed to create activity: {:?}", e);
+            HttpResponse::InternalServerError().json(json!({"error": "Failed to create activity"}))
         }
     }
 }

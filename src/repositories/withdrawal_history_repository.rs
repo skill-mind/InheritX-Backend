@@ -80,3 +80,93 @@ pub async fn get_withdrawal_history(
 
     Ok((activities, total))
 }
+
+pub async fn delete_withdrawal(client: &Client, id: i64) -> Result<(), Error> {
+    let stmt = client
+        .prepare("DELETE FROM withdrawal_history WHERE id = $1")
+        .await?;
+
+    client.execute(&stmt, &[&id]).await?;
+
+    Ok(())
+}
+
+pub async fn get_withdrawal_by_id(client: &Client, id: i64) -> Result<WithdrawalRecord, Error> {
+    let stmt = client
+        .prepare("SELECT id, plan_id, wallet_id, amount, payer_name, created_at FROM withdrawal_history WHERE id = $1")
+        .await?;
+
+    let row = client.query_one(&stmt, &[&id]).await?;
+
+    Ok(WithdrawalRecord {
+        id: row.get(0),
+        plan_id: row.get(1),
+        wallet_id: row.get(2),
+        amount: row.get(3),
+        payer_name: row.get(4),
+        created_at: row.get(5),
+    })
+}
+
+pub async fn update_withdrawal(
+    client: &Client,
+    // id: i64,
+    withdrawal_record: &WithdrawalRecord,
+) -> Result<WithdrawalRecord, Error> {
+    let stmt = client
+        .prepare(
+            "UPDATE withdrawal_history
+             SET plan_id = $1, wallet_id = $2, amount = $3, payer_name = $4
+             WHERE id = $5
+             RETURNING id, plan_id, wallet_id, amount, payer_name, created_at",
+        )
+        .await?;
+
+    let row = client
+        .query_one(
+            &stmt,
+            &[
+                &withdrawal_record.plan_id,
+                &withdrawal_record.wallet_id,
+                &withdrawal_record.amount,
+                &withdrawal_record.payer_name,
+                &withdrawal_record.id,
+            ],
+        )
+        .await?;
+
+    Ok(WithdrawalRecord {
+        id: row.get(0),
+        plan_id: row.get(1),
+        wallet_id: row.get(2),
+        amount: row.get(3),
+        payer_name: row.get(4),
+        created_at: row.get(5),
+    })
+}
+
+pub async fn get_withdrawal_history_by_user_id(
+    client: &Client,
+    user_id: &i64,
+) -> Result<Vec<WithdrawalRecord>, Error> {
+    let stmt = client
+        .prepare("SELECT id, plan_id, wallet_id, amount, payer_name, created_at FROM withdrawal_history WHERE user_id = $1")
+        .await?;
+
+    let rows = client.query(&stmt, &[&user_id]).await?;
+
+    let mut activities = Vec::new();
+
+    for row in rows {
+        activities.push(WithdrawalRecord {
+            id: row.get(0),
+            plan_id: row.get(1),
+            wallet_id: row.get(2),
+            amount: row.get(3),
+            payer_name: row.get(4),
+            created_at: row.get(5),
+        });
+    }
+
+    Ok(activities)
+}

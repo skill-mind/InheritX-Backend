@@ -3,11 +3,11 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WithdrawalRecord {
-    pub id: i32,
+    pub id: i64,
     pub plan_id: String,
     // pub date: DateTime<Utc>,
     pub wallet_id: String,
-    pub amount: i32,
+    pub amount: i64,
     pub payer_name: String,
     pub created_at: DateTime<Utc>,
 }
@@ -22,11 +22,16 @@ pub struct CreateWithdrawalRecordRequest {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct SingleWithdrawalRecordRequest {
+    pub id: i64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct WithdrawalRecordResponse {
-    pub id: i32,
+    pub id: i64,
     pub plan_id: String,
     pub wallet_id: String,
-    pub amount: i32,
+    pub amount: i64,
     pub payer_name: String,
     pub created_at: String, // Formatted as dd-mm-yyyy
 }
