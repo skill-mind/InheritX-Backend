@@ -1,8 +1,11 @@
-use actix_web::{web, HttpResponse, Responder};
 use crate::model::ActivityLog;
+use actix_web::{HttpResponse, Responder, web};
 use std::sync::Mutex;
 
-pub async fn create(log: web::Json<ActivityLog>, data: web::Data<Mutex<Vec<ActivityLog>>>) -> impl Responder {
+pub async fn create(
+    log: web::Json<ActivityLog>,
+    data: web::Data<Mutex<Vec<ActivityLog>>>,
+) -> impl Responder {
     let mut logs = data.lock().unwrap();
     logs.push(log.into_inner());
     HttpResponse::Created().json("Activity log created")
@@ -13,7 +16,11 @@ pub async fn get_all(data: web::Data<Mutex<Vec<ActivityLog>>>) -> impl Responder
     HttpResponse::Ok().json(&*logs)
 }
 
-pub async fn update(path: web::Path<u32>, log: web::Json<ActivityLog>, data: web::Data<Mutex<Vec<ActivityLog>>>) -> impl Responder {
+pub async fn update(
+    path: web::Path<u32>,
+    log: web::Json<ActivityLog>,
+    data: web::Data<Mutex<Vec<ActivityLog>>>,
+) -> impl Responder {
     let id = path.into_inner();
     let mut logs = data.lock().unwrap();
     if let Some(existing) = logs.iter_mut().find(|x| x.id == id) {
@@ -24,7 +31,10 @@ pub async fn update(path: web::Path<u32>, log: web::Json<ActivityLog>, data: web
     }
 }
 
-pub async fn delete(path: web::Path<u32>, data: web::Data<Mutex<Vec<ActivityLog>>>) -> impl Responder {
+pub async fn delete(
+    path: web::Path<u32>,
+    data: web::Data<Mutex<Vec<ActivityLog>>>,
+) -> impl Responder {
     let id = path.into_inner();
     let mut logs = data.lock().unwrap();
     let len_before = logs.len();
