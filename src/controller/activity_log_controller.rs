@@ -1,4 +1,4 @@
-use crate::models::activity_models::ActivityLog;
+use crate::model::ActivityLog;
 use actix_web::{HttpResponse, Responder, web};
 use std::sync::Mutex;
 

@@ -5,7 +5,7 @@ mod repositories;
 mod routes;
 
 use actix_web::{App, HttpServer, web};
-use controller::{claim_controller, notification_controller, kyc_controller};
+use controller::{claim_controller, notification_controller};
 use db::create_pool;
 
 #[actix_web::main]
@@ -25,7 +25,6 @@ async fn main() -> std::io::Result<()> {
             .configure(routes::configure)
             .configure(notification_controller::config)
             .configure(claim_controller::config)
-            .configure(kyc_controller::config)
     })
     .bind("127.0.0.1:8080")?
     .run()

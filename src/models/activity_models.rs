@@ -1,15 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ActivityLog {
-    pub id: u32,
-    pub user_id: String,
-    pub action: String,
-    pub timestamp: DateTime<Utc>,
-    pub details: String,
-}
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UserActivity {
     pub id: i32,
