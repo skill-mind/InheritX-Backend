@@ -7,7 +7,6 @@ mod tests {
     use crate::models::kyc_models::{CreateKycRequest, KycVerificationRequest};
 
     fn create_test_pool() -> Pool {
-        // This would be a mock or test database setup
         todo!("Implement test database setup")
     }
 
