@@ -6,7 +6,19 @@ use crate::models::withdrawal_history_models::{
     CreateWithdrawalRecordRequest, SingleWithdrawalRecordRequest, WithdrawalRecord,
     WithdrawalRecordResponse, WithdrawalRecordsResponse,
 };
-use crate::repositories::withdrawal_history_repository;
+use crate::repositories::{withdrawal_history_repository, kyc_repository};
+
+pub fn config(cfg: &mut web::ServiceConfig) {
+    cfg.service(
+        web::scope("/api/withdrawals")
+            .route("/record", web::post().to(record_withdrawal))
+            .route("/history", web::get().to(get_withdrawal_history))
+            .route("/delete", web::post().to(delete_withdrawal))
+            .route("/single", web::get().to(get_single_withdrawal))
+            .route("/update", web::post().to(update_withdrawal))
+            .route("/user", web::get().to(get_withdrawal_history_by_user)),
+    );
+}
 
 pub async fn record_withdrawal(
     db_pool: web::Data<Pool>,
@@ -20,6 +32,26 @@ pub async fn record_withdrawal(
         }
     };
 
+    // Check KYC verification status before allowing withdrawal
+    let user_id = &withdrawal_history_request.user_id.parse::<i32>().unwrap_or(0); // Convert string to i32
+    match kyc_repository::is_kyc_verified(&client, user_id).await {
+        Ok(is_verified) => {
+            if !is_verified {
+                return HttpResponse::Forbidden().json(json!({
+                    "error": "KYC verification required",
+                    "message": "You must complete KYC verification before making withdrawals."
+                }));
+            }
+        },
+        Err(e) => {
+            eprintln!("Failed to check KYC verification status: {:?}", e);
+            return HttpResponse::InternalServerError().json(json!({
+                "error": "Failed to verify KYC status"
+            }));
+        }
+    }
+
+    // Proceed with withdrawal if KYC is verified
     match withdrawal_history_repository::record_withdrawal(
         &client,
         &withdrawal_history_request.into_inner(),
