@@ -1,7 +1,8 @@
 pub mod activity_log_routes;
 pub mod activity_routes;
-pub mod withdrawal_history_routes;
+pub mod faq_routes;
 pub mod kyc_routes;
+pub mod withdrawal_history_routes;
 
 use actix_web::web;
 

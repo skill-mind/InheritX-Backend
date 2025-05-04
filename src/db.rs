@@ -30,6 +30,12 @@ pub async fn run_migrations(pool: &deadpool_postgres::Pool) {
             updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
 
+        CREATE TABLE IF NOT EXISTS faqs (
+            id SERIAL PRIMARY KEY,
+            question TEXT NOT NULL,
+            answer TEXT NOT NULL
+        );
+        
         CREATE TABLE IF NOT EXISTS user_activities (
             id SERIAL PRIMARY KEY,
             user_id VARCHAR(255) NOT NULL,
