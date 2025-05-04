@@ -1,0 +1,22 @@
+### InheritX API Tests
+@baseUrl = http://localhost:8080
+
+### -------------------------------------------------------------------------
+### ACTIVITY ENDPOINTS
+### -------------------------------------------------------------------------
+
+### Get User Activities
+GET {{baseUrl}}/activities/123
+Content-Type: application/json
+
+### Create User Activity
+POST {{baseUrl}}/activities
+Content-Type: application/json
+
+{
+  "user_id": "123",
+  "activity_type": "login",
+  "details": "User logged in from desktop",
+  "action_type": "view",
+  "action_link": "/dashboard"
+}

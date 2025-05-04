@@ -1,4 +1,4 @@
-use crate::models::notification::{CreateNotification, Notification, UpdateNotification};
+use crate::models::notification::{CreateNotification, UpdateNotification};
 use crate::repositories::notification_repository;
 use actix_web::{HttpResponse, Responder, web};
 use deadpool_postgres::Pool;

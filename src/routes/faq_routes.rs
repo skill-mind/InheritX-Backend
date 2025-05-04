@@ -1,7 +1,7 @@
-// Using the figma file, create a route for faq and user supportuse actix_web::web;
 use crate::controller::faq_controller;
+use actix_web::web;
 
-pub fn config(cfg: &mut web::ServiceConfig) {
+pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/faqs")
             .route("", web::get().to(faq_controller::get_faqs))

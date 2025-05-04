@@ -35,8 +35,23 @@ pub async fn run_migrations(pool: &deadpool_postgres::Pool) {
             question TEXT NOT NULL,
             answer TEXT NOT NULL
         );
+        
+        CREATE TABLE IF NOT EXISTS user_activities (
+            id SERIAL PRIMARY KEY,
+            user_id VARCHAR(255) NOT NULL,
+            date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            activity_type VARCHAR(50) NOT NULL,
+            details TEXT NOT NULL,
+            action_type VARCHAR(50) NOT NULL,
+            action_link TEXT,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
 
-        CREATE TYPE IF NOT EXISTS claim_status AS ENUM ('pending', 'approved', 'rejected');
+        DO $$ BEGIN
+            CREATE TYPE claim_status AS ENUM ('pending', 'approved', 'rejected');
+        EXCEPTION
+            WHEN duplicate_object THEN null;
+        END $$;
 
         CREATE TABLE IF NOT EXISTS claims (
             id SERIAL PRIMARY KEY,
@@ -46,6 +61,19 @@ pub async fn run_migrations(pool: &deadpool_postgres::Pool) {
             description TEXT NOT NULL,
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+
+        CREATE TABLE IF NOT EXISTS kyc_records (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL,
+            full_name VARCHAR(255) NOT NULL,
+            date_of_birth VARCHAR(50) NOT NULL,
+            id_type VARCHAR(50) NOT NULL,
+            id_number VARCHAR(100) NOT NULL,
+            address TEXT NOT NULL,
+            verification_status VARCHAR(50) NOT NULL DEFAULT 'pending',
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMPTZ
         );
     ",
         )
